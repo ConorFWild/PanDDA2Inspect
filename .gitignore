@@ -1,0 +1,28 @@
+# OS generated files #
+######################
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+package-lock.json
+
+# Output and Data
+data
+build
+out
+node_modules
+
+# Moorhen Files
+public/baby-gru
+public/coot_env_web.js
+public/CootWorker.js
+public/CootWorker.ts
+public/moorhen.js
+public/moorhen.wasm
+public/moorhen64.js
+public/moorhen64.wasm
+
+src/moorhen.css
