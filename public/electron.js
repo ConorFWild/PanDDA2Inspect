@@ -11,6 +11,9 @@ const { ipcMain } = require('electron');
 const yargs = require('yargs');
 const pd = require("node-pandas")
 const { format, writeToPath } = require('@fast-csv/format');
+const { parse } = require('fast-csv');
+const { pipeline } = require('node:stream/promises');
+
 
 let panddaInspectColumns = [
   'dtag',
@@ -46,6 +49,14 @@ let panddaInspectColumns = [
   'Viewed'
 ];
 
+
+let panddaInspectSitesColumns = [
+  'site_idx',
+  'centroid',
+  'Name',
+  'Comment'
+
+];
 // Handle creating/removing shortcuts on Windows when installing/uninstalling
 if (require("electron-squirrel-startup")) {
   app.quit();
@@ -61,6 +72,8 @@ if (isDev) {
 }
 
 console.log('creating window');
+
+
 
 function createWindow() {
   // Create the browser window.
@@ -140,9 +153,64 @@ function createWindow() {
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
-app.whenReady().then(() => {
+app.whenReady().then(
+  async () => {
+    const args = yargs(process.argv.slice(1)).parse()._[0];
 
-  const args = yargs(process.argv.slice(1)).parse()._[0];
+    const pandaAnalyseEventsPath = path.join(args, 'analyses', 'pandda_analyse_events.csv');
+    const pandaInspectEventsPath = path.join(args, 'analyses', 'pandda_inspect_events.csv');
+    const pandaAnalyseSitesPath = path.join(args, 'analyses', 'pandda_analyse_sites.csv');
+    const pandaInspectSitesPath = path.join(args, 'analyses', 'pandda_inspect_sites.csv');
+    let csvPath = pandaAnalyseEventsPath;
+    let siteCSVPath = pandaAnalyseSitesPath;
+    if (fs.existsSync(pandaInspectEventsPath)) {
+      csvPath = pandaInspectEventsPath;
+      siteCSVPath = pandaInspectSitesPath;
+    }
+
+    console.log(csvPath);
+    const df = pd.readCsv(csvPath);
+    //
+    for (var dfIndex in df) {
+      df[dfIndex][''] = dfIndex;
+    }
+
+    // Add inspect records if not alread present
+    if (df.length > 0) {
+      if (!('Viewed' in df[0])) {
+        for (var dfIndex in df) {
+          df[dfIndex]['Interesting'] = 'False';
+          df[dfIndex]['Ligand Placed'] = 'False';
+          df[dfIndex]['Ligand Confidence'] = 'Low';
+          df[dfIndex]['Comment'] = 'None';
+          df[dfIndex]['Viewed'] = 'False';
+        }
+      }
+    }
+    console.log(df.show);
+
+    console.log(siteCSVPath);
+    // const siteDataFrame = pd.readCsv(siteCSVPath);
+    const siteDataFrameStream = fs.createReadStream(siteCSVPath);
+    const siteDataFrame = []
+    const parseStream = parse({ headers: true })
+      .on('error', error => console.error(error))
+      .on('data', row => siteDataFrame.push(row))
+      .on('end', (rowCount) => console.log(`Parsed ${rowCount} rows`));
+    // stream.write(siteDataFrameString);
+    const finishedStream = await pipeline(siteDataFrameStream, parseStream)
+    console.log(siteDataFrame);
+    return {
+      args: args,
+      data: df,
+      siteData: siteDataFrame
+    }
+  }
+).then((obj) => {
+  const df = obj.data;
+  const siteData = obj.siteData;
+  const args = obj.args;
+
   // const loadURL = serve({ directory: args._[0] });
   // loadURL(mainWindow);
 
@@ -152,37 +220,15 @@ app.whenReady().then(() => {
 
   })
 
-  const pandaAnalyseEventsPath = path.join(args, 'analyses', 'pandda_analyse_events.csv');
-  const pandaInspectEventsPath = path.join(args, 'analyses', 'pandda_inspect_events.csv');
-  let csvPath = pandaAnalyseEventsPath;
-  if (fs.existsSync(pandaInspectEventsPath)) {
-    csvPath = pandaInspectEventsPath;
-  }
 
-  console.log(csvPath);
-  df = pd.readCsv(csvPath);
-  console.log(df.show);
 
-  //
-  for (var dfIndex in df) {
-    df[dfIndex][''] = dfIndex;
-  }
-
-  // Add inspect records if not alread present
-  if (df.length > 0) {
-    if (!('Viewed' in df[0])) {
-      for (var dfIndex in df) {
-        df[dfIndex]['Interesting'] = 'False';
-        df[dfIndex]['Ligand Placed'] = 'False';
-        df[dfIndex]['Ligand Confidence'] = 'Low';
-        df[dfIndex]['Comment'] = 'None';
-        df[dfIndex]['Viewed'] = 'False';
-      }
-    }
-  }
 
   ipcMain.handle('get-data', async (event,) => {
     return df
+  })
+
+  ipcMain.handle('get-site-data', async (event,) => {
+    return siteData
   })
 
   ipcMain.handle('save-data', async (event, action) => {
@@ -236,12 +282,32 @@ app.whenReady().then(() => {
       data,
       { headers: panddaInspectColumns }
     );
-    // const csvStream = format({ headers: panddaInspectColumns });
-    // csvStream.pipe(path.join(args, 'analyses', 'pandda_inspect_events.csv'));//.on('end', () => process.exit());
-    // for (var index in data) {
-    //   csvStream.write(data[index]);
-    // }
-    // csvStream.end();
+  })
+
+  ipcMain.handle('save-site-data', async (event, action) => {
+    console.log('Saving data...');
+    console.log(action.data);
+    let data = [];
+    for (var index in action.data) {
+      record = action.data[index];
+      newRecord = [
+        record['site_idx'],
+        record['centroid'],
+        record['Name'],
+        record['Comment'],
+      ];
+      data.push(newRecord);
+    }
+    console.log(data);
+    // new_df = pd.DataFrame(data, columns = panddaInspectColumns);
+    // console.log(new_df);
+    // new_df.toCsv();
+
+    await writeToPath(
+      path.join(args, 'analyses', 'pandda_inspect_sites.csv'),
+      data,
+      { headers: panddaInspectSitesColumns }
+    );
   })
 
   ipcMain.handle('get-mol', async (event, action) => {

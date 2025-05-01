@@ -22,8 +22,11 @@ function updateEvent(draft, record) {
     draft.event_interesting = record['Interesting'];
     draft.ligand_placed = record['Ligand Placed'];
     draft.ligand_confidence = record['Ligand Confidence'];
-    draft.site_name = record['Site Name'];
-    draft.site_comment = record['Site Comment'];
+}
+
+function updateSite(draft, record) {
+    draft.site_name = record['Name'];
+    draft.site_comment = record['Comment'];
 }
 
 
@@ -35,6 +38,14 @@ export function panDDAInspectReducer(draft, action) {
             draft.data = action.df;
             const record = action.df[0];
             updateEvent(draft, record);
+            console.log('Set initial data');
+            break;
+        }
+        case 'handleSetInitialSiteData': {
+            console.log('Setting initial data');
+            draft.siteData = action.df;
+            const record = action.df[0];
+            updateSite(draft, record);
             console.log('Set initial data');
             break;
         }
@@ -68,10 +79,17 @@ export function panDDAInspectReducer(draft, action) {
             draft.data[draft.table_idx]['Interesting'] = draft.event_interesting;
             draft.data[draft.table_idx]['Ligand Placed'] = draft.ligand_placed;
             draft.data[draft.table_idx]['Ligand Confidence'] = draft.ligand_confidence;
-            draft.data[draft.table_idx]['Site Name'] = draft.site_name;
-            draft.data[draft.table_idx]['Site Comment'] = draft.site_comment;
             console.log('Updated!')
             console.log(current(draft.data[draft.table_idx]));
+            break;
+        }
+
+        case 'updateSiteData': {
+            console.log('Updating data in working table...')
+            draft.siteData[parseInt(draft.site)]['Name'] = draft.site_name;
+            draft.siteData[parseInt(draft.site)]['Comment'] = draft.site_comment;
+            console.log('Updated!')
+            console.log(current(draft.siteData[draft.site]));
             break;
         }
 
@@ -83,6 +101,8 @@ export function panDDAInspectReducer(draft, action) {
             draft.table_idx = new_index;
             const record = draft.data[new_index];
             updateEvent(draft, record);
+            const siteRecord = draft.siteData.filter((_siteRecord) => { return (parseInt(_siteRecord.site_idx) == record.site_idx) })[0];
+            updateSite(draft, siteRecord);
             break;
         }
         case 'handleNextEvent': {
@@ -95,9 +115,13 @@ export function panDDAInspectReducer(draft, action) {
             }
             console.log(`Next event is ${new_index}...`);
 
-            draft.table_idx = new_index;
             const record = draft.data[new_index];
             updateEvent(draft, record);
+            const siteRecord = draft.siteData.filter((_siteRecord) => { return (parseInt(_siteRecord.site_idx) == record.site_idx) })[0];
+            console.log(`site data: ${siteRecord}`)
+            updateSite(draft, siteRecord);
+            draft.table_idx = new_index;
+
             break;
         }
         case 'handlePreviousEvent': {
@@ -110,9 +134,12 @@ export function panDDAInspectReducer(draft, action) {
             }
             console.log(`Previous event is ${new_index}...`);
 
-            draft.table_idx = new_index;
             const record = draft.data[new_index];
             updateEvent(draft, record);
+            const siteRecord = draft.siteData.filter((_siteRecord) => { return (parseInt(_siteRecord.site_idx) == record.site_idx) })[0];
+            updateSite(draft, siteRecord);
+            draft.table_idx = new_index;
+
             break;
         }
         case 'handleLoadEvent': {
@@ -122,10 +149,12 @@ export function panDDAInspectReducer(draft, action) {
                 break;
             }
             else {
-                draft.table_idx = action.idx;
                 console.log(action.data)
                 const record = action.data[action.idx];
                 updateEvent(draft, record);
+                const siteRecord = draft.siteData.filter((_siteRecord) => { return (parseInt(_siteRecord.site_idx) == record.site_idx) })[0];
+                updateSite(draft, siteRecord);
+                draft.table_idx = action.idx;
                 console.log('Loaded initial Event');
                 break;
             }
@@ -148,9 +177,11 @@ export function panDDAInspectReducer(draft, action) {
             console.log(siteIndexes);
             const lowestTableNumInSite = Math.min(...siteIndexes);
             console.log(`New index is: ${lowestTableNumInSite}...`);
-            draft.table_idx = lowestTableNumInSite;
             const record = draft.data[lowestTableNumInSite];
             updateEvent(draft, record);
+            const siteRecord = draft.siteData.filter((_siteRecord) => { return (parseInt(_siteRecord.site_idx) == record.site_idx) })[0];
+            updateSite(draft, siteRecord);
+            draft.table_idx = lowestTableNumInSite;
             break;
         }
         case 'handlePreviousSite': {
@@ -168,9 +199,12 @@ export function panDDAInspectReducer(draft, action) {
             console.log(siteIndexes);
             const lowestTableNumInSite = Math.min(...siteIndexes);
             console.log(`New index is: ${lowestTableNumInSite}...`);
-            draft.table_idx = lowestTableNumInSite;
             const record = draft.data[lowestTableNumInSite];
             updateEvent(draft, record);
+            const siteRecord = draft.siteData.filter((_siteRecord) => { return (parseInt(_siteRecord.site_idx) == record.site_idx) })[0];
+            updateSite(draft, siteRecord);
+            draft.table_idx = lowestTableNumInSite;
+
             break;
         }
         case 'handleNextUnviewed': {
@@ -187,9 +221,12 @@ export function panDDAInspectReducer(draft, action) {
             } else {
                 const newRecordIDX = nextUnviewedEvents[0][''];
                 console.log(`New index is: ${newRecordIDX}...`);
-                draft.table_idx = newRecordIDX;
                 const record = data[newRecordIDX];
                 updateEvent(draft, record);
+                const siteRecord = draft.siteData.filter((_siteRecord) => { return (parseInt(_siteRecord.site_idx) == record.site_idx) })[0];
+                updateSite(draft, siteRecord);
+                draft.table_idx = newRecordIDX;
+
             }
             break;
         }
@@ -208,9 +245,12 @@ export function panDDAInspectReducer(draft, action) {
             } else {
                 const newRecordIDX = nextUnviewedEvents[0][''];
                 console.log(`New index is: ${newRecordIDX}...`);
-                draft.table_idx = newRecordIDX;
                 const record = draft.data[newRecordIDX];
                 updateEvent(draft, record);
+                const siteRecord = draft.siteData.filter((_siteRecord) => { return (parseInt(_siteRecord.site_idx) == record.site_idx) })[0];
+                updateSite(draft, siteRecord);
+                draft.table_idx = newRecordIDX;
+
             }
             break;
         }
@@ -225,9 +265,12 @@ export function panDDAInspectReducer(draft, action) {
             }
             console.log(`Next event is ${new_index}...`);
 
-            draft.table_idx = new_index;
             const record = draft.data[new_index];
             updateEvent(draft, record);
+            const siteRecord = draft.siteData.filter((_siteRecord) => { return (parseInt(_siteRecord.site_idx) == record.site_idx) })[0];
+            updateSite(draft, siteRecord);
+            draft.table_idx = new_index;
+
             break;
         }
         case 'handleMergeLigand': {
@@ -250,7 +293,6 @@ export function panDDAInspectReducer(draft, action) {
         case 'handleSetEventComment': {
 
             if ((typeof action.value) != undefined) {
-
                 draft.event_comment = action.value;
             }
             break;
@@ -283,7 +325,6 @@ export function panDDAInspectReducer(draft, action) {
         // handleSetSiteName
         case 'handleSetSiteName': {
             if ((typeof action.value) != undefined) {
-
                 draft.site_name = action.value;
             }
             break;

@@ -15,6 +15,7 @@ import { styled } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
 import { Button } from '@mui/material';
 import { ThemeProvider } from '@mui/material'
+import { green } from '@mui/material/colors';
 
 import { theme } from './PanDDA2Constants';
 import { EventInteresting, LigandPlaced, LigandConfidence } from './PanDDAInspectTypes';
@@ -95,19 +96,31 @@ const PanDDAInspectDatasetControl = ({ state, handlers }) => {
     console.log('In Dataset control');
     console.log(handlers);
 
-    const selectItems = state.data.map((record) =>
-        <MenuItem value={record['']}>
-            <Box sx={{ flexGrow: 1 }}>
-                <Grid container spacing={0} columns={3}>
-                    <Grid size={2}>
-                        {record.dtag} {record.event_idx}
+    const selectItems = state.data.map((record) => {
+        let colorGrade = Math.floor(record.z_peak * 10) * 100;
+        if (colorGrade == 1000) {
+            colorGrade = 900;
+        } else if (colorGrade == 0) {
+            colorGrade = 50;
+        }
+        return (
+            <MenuItem value={record['']}>
+                <Box sx={{ flexGrow: 1 }}>
+                    <Grid container spacing={0} columns={4}>
+                        <Grid size={2}>
+                            {record.dtag} {record.event_idx}
+                        </Grid>
+                        <Grid size={1}>
+                            Score: <Box sx={{ color: green[colorGrade] }}>{Number.parseFloat(record.z_peak).toFixed(2)}</Box>
+                        </Grid>
+                        <Grid size={1}>
+                            <Typography variant="inherit" align='right'>Site: {record.site_idx}</Typography>
+                        </Grid>
                     </Grid>
-                    <Grid size={1}>
-                        <Typography variant="inherit" align='right'>Site: {record.site_idx}</Typography>
-                    </Grid>
-                </Grid>
-            </Box>
-        </MenuItem>
+                </Box>
+            </MenuItem>
+        )
+    }
     );
 
     return (

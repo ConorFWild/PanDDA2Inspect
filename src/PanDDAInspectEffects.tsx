@@ -5,7 +5,7 @@ import {
 
 import path from 'path-browserify';
 
-import { structureFactors } from './PanDDAInspectTypes';
+import { structureFactors } from './PanDDA2Constants';
 
 
 async function loadMoleculeFromPath(commandCentre, glRef, dispatch, mol_path, mol_name, cifs) {
@@ -137,8 +137,19 @@ async function updateData(dispatch) {
     );
 
 }
+async function updateSiteData(dispatch) {
+    dispatch(
+        {
+            'type': 'updateSiteData',
+        }
+    );
+
+}
 async function saveData(pandda_inspect_state) {
     await window.electronAPI.saveData({ data: pandda_inspect_state.data });
+}
+async function saveSiteData(pandda_inspect_state) {
+    await window.electronAPI.saveSiteData({ data: pandda_inspect_state.siteData });
 }
 async function removeMolJS(coot_dispatch, _mol) {
     console.log(`removing mol ${_mol.molNo}`);
@@ -250,7 +261,11 @@ export function handleNextEvent(glRef, commandCentre, molecules, dispatch, pandd
     console.log('Select event');
     async function nextEvent() {
         await updateData(dispatch);
+        await updateSiteData(dispatch);
+
         await saveData(pandda_inspect_state);
+        await saveSiteData(pandda_inspect_state);
+
         await saveModel(molecules, pandda_inspect_state);
         dispatch(
             {
@@ -352,6 +367,8 @@ export function handleSetEventComment(dispatch, event: React.ChangeEvent<HTMLInp
                 value: (event.target as HTMLInputElement).value
             });
         await updateData(dispatch);
+        await updateSiteData(dispatch);
+
     }
     setEventComment();
 }
@@ -364,7 +381,11 @@ export function handleSetInteresting(dispatch, pandda_inspect_state, event: Reac
                 value: (event.target as HTMLInputElement).value
             });
         await updateData(dispatch);
+        await updateSiteData(dispatch);
+
         await saveData(pandda_inspect_state);
+        await saveSiteData(pandda_inspect_state);
+
     }
     setInteresting();
 }
@@ -377,7 +398,11 @@ export function handleSetPlaced(dispatch, pandda_inspect_state, event: React.Cha
                 value: (event.target as HTMLInputElement).value
             });
         await updateData(dispatch);
+        await updateSiteData(dispatch);
+
         await saveData(pandda_inspect_state);
+        await saveSiteData(pandda_inspect_state);
+
     }
     setPlaced();
 }
@@ -391,7 +416,11 @@ export function handleSetConfidence(dispatch, pandda_inspect_state, event: React
                 value: (event.target as HTMLInputElement).value
             });
         await updateData(dispatch);
+        await updateSiteData(dispatch);
+
         await saveData(pandda_inspect_state);
+        await saveSiteData(pandda_inspect_state);
+
     }
     setConfidence();
 }
@@ -404,6 +433,8 @@ export function handleSetSiteName(dispatch, pandda_inspect_state, event: React.C
                 value: (event.target as HTMLInputElement).value
             });
         await updateData(dispatch);
+        await updateSiteData(dispatch);
+
         // await saveData();
     }
     setSiteName();
@@ -417,6 +448,8 @@ export function handleSetSiteComment(dispatch, pandda_inspect_state, event: Reac
                 value: (event.target as HTMLInputElement).value
             });
         await updateData(dispatch);
+        await updateSiteData(dispatch);
+
     }
     setSiteComment();
 }
@@ -455,11 +488,33 @@ function handleSetInitialData(dispatch, df) {
         });
 }
 
+function handleSetInitialSiteData(dispatch, df) {
+    dispatch(
+        {
+            type: 'handleSetInitialSiteData',
+            df: df
+        });
+}
+
 export async function getData(dispatch, pandda_inspect_state) {
     console.log('In effect to get data');
     const get_data = async function () {
         const df = await window.electronAPI.data();
         handleSetInitialData(dispatch, df)
+    };
+    if (pandda_inspect_state.data.length == 0) {
+        console.log('Getting data...');
+        get_data();
+        console.log('got data');
+    }
+}
+
+
+export async function getSiteData(dispatch, pandda_inspect_state) {
+    console.log('In effect to get data');
+    const get_data = async function () {
+        const df = await window.electronAPI.getSiteData();
+        handleSetInitialSiteData(dispatch, df)
     };
     if (pandda_inspect_state.data.length == 0) {
         console.log('Getting data...');

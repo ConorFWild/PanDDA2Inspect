@@ -9,7 +9,9 @@ import { useImmerReducer } from 'use-immer';
 import './App.css';
 import './moorhen.css';
 
-import { PanDDAInspectEventHandlers, initialPanDDAInspectState } from './PanDDAInspectTypes';
+import { PanDDAInspectEventHandlers } from './PanDDAInspectTypes';
+import { initialPanDDAInspectState } from './PanDDA2Constants';
+
 import { PanDDAInspect } from './PanDDAInspect';
 import { panDDAInspectReducer } from './PanDDAInspectReducer'
 import {
@@ -39,6 +41,7 @@ import {
   handleCreateNewLigand,
   getLigandFiles,
   getData,
+  getSiteData,
   handleGetArgs,
   loadEventData
 } from './PanDDAInspectEffects'
@@ -81,6 +84,13 @@ function MoorhenController() {
   useEffect(
     () => {
       getData(dispatch, pandda_inspect_state);
+    }, []
+  )
+
+  // Effect to get pandda site table data
+  useEffect(
+    () => {
+      getSiteData(dispatch, pandda_inspect_state);
     }, []
   )
 
@@ -131,7 +141,7 @@ function MoorhenController() {
     handleCreateNewLigand: () => { handleCreateNewLigand() },
   };
 
-  // Effect to load initial event
+  // Effect to load events
   useEffect(
     () => {
       loadEventData(cootInitialized, glRef, commandCentre, molecules, maps, coot_dispatch, dispatch, pandda_inspect_state);
