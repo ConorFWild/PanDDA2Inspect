@@ -1,4 +1,4 @@
-const { app, crashReporter } = require('electron')
+const { app, BrowserWindow, crashReporter} = require("electron");
 
 console.log(app.getPath('crashDumps'))
 crashReporter.start({ submitURL: '', uploadToServer: false })
@@ -9,7 +9,6 @@ const process = require('process');
 const fs = require("fs");
 
 
-const { app, BrowserWindow } = require("electron");
 const isDev = require("electron-is-dev");
 
 const { ipcMain } = require('electron');
