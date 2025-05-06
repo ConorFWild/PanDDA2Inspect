@@ -5,6 +5,16 @@ An Electron/Moorhen implementation of `pandda.inspect` for visualizing and model
 
 The build instructions are identical to the [original repository](./MoorhenElectronREADME.md) for Electron/Moorhen from which this is forked.
 
+An additional reccomended step is to add `pandda.inspect` to your path like so:
+
+```bash
+# Linux
+echo "alias pandda.inspect=\"$(readlink -f .)/out/Moorhen-linux-x64/Moorhen\"" >> ~/.bashrc
+
+# Mac
+echo "alias pandda.inspect=\"$(readlink -f .)/out/Moorhen-darwin-arm64/Moorhen.app/Contents/MacOS/Moorhen\"" >> ~/.bashrc
+```
+
 ## **References**
 
 * Coot

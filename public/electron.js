@@ -1,3 +1,8 @@
+const { app, crashReporter } = require('electron')
+
+console.log(app.getPath('crashDumps'))
+crashReporter.start({ submitURL: '', uploadToServer: false })
+
 const path = require("path");
 const express = require('express');
 const process = require('process');
