@@ -15,6 +15,12 @@ echo "alias pandda.inspect=\"$(readlink -f .)/out/Moorhen-linux-x64/Moorhen\"" >
 echo "alias pandda.inspect=\"$(readlink -f .)/out/Moorhen-darwin-arm64/Moorhen.app/Contents/MacOS/Moorhen\"" >> ~/.bashrc
 ```
 
+Then the program can be run with:
+
+```bash
+pandda.inspect /path/to/pandda/output
+```
+
 ## **References**
 
 * Coot
