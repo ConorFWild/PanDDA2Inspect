@@ -11,7 +11,7 @@ An additional reccomended step is to add `pandda.inspect` to your path like so:
 # Linux
 echo "alias pandda.inspect=\"$(readlink -f .)/out/Moorhen-linux-x64/Moorhen\"" >> ~/.bashrc
 
-# Mac
+# Mac (M1)
 echo "alias pandda.inspect=\"$(readlink -f .)/out/Moorhen-darwin-arm64/Moorhen.app/Contents/MacOS/Moorhen\"" >> ~/.bashrc
 ```
 
@@ -20,6 +20,20 @@ Then the program can be run with:
 ```bash
 pandda.inspect /path/to/pandda/output
 ```
+
+## Debugging
+
+### The program failed to run
+
+If the program fails to run (especially when using NoMachine to Diamond Light Source) with the error:
+
+```bash
+Trace/breakpoint trap (core dumped)
+```
+
+this is because there is not enough system RAM. The only solution to this is to run the program on a different machine. 
+
+At Diamond Light Source if you NoMachine to a workstation (for example @i04-1-ws001) rather than a server node (for example @cs05r-sc-serv-05) then it will work on those machines!
 
 ## **References**
 
