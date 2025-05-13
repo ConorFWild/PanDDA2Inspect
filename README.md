@@ -15,13 +15,17 @@ echo "alias pandda.inspect=\"$(readlink -f .)/out/Moorhen-linux-x64/Moorhen\"" >
 echo "alias pandda.inspect=\"$(readlink -f .)/out/Moorhen-darwin-arm64/Moorhen.app/Contents/MacOS/Moorhen\"" >> ~/.bashrc
 ```
 
-Then the program can be run with:
+Then, after opening a new console, the program can be run with:
 
 ```bash
 pandda.inspect /path/to/pandda/output
 ```
 
 ## Debugging
+
+### Parts of the UI are not visible
+
+PanDDA 2 Inspect has been tested fullscreen on 1920x1080 screens, and should work correctly on these. If your screen resolution is smaller than this or if you are not fullscreen you may see graphical anomolies. 
 
 ### The program failed to run
 

@@ -27,7 +27,11 @@ async function loadMoleculeFromPath(commandCentre, glRef, dispatch, mol_path, mo
         console.log(commandCentre);
         console.log(glRef);
         console.log('await load molecule from string...');
-        await newMolecule.loadToCootFromString(pdbStr, mol_name);
+        try {
+            await newMolecule.loadToCootFromString(pdbStr, mol_name);
+        } catch (error) {
+            throw error;
+        }
         console.log(newMolecule);
 
         console.log('Adding ligands...')
@@ -247,6 +251,68 @@ async function loadNextLigand(dispatch, molecules, pandda_inspect_state) {
     )
 }
 
+async function loadLigandAutobuild(glRef, commandCentre, molecules, coot_dispatch, dispatch, pandda_inspect_state) {
+    console.log('Adding best autobuild...')
+    // Get the active mol
+    const activeMol = molecules.moleculeList.filter((_mol) => { return _mol.molNo == pandda_inspect_state.activeProteinMol; })[0];
+
+    // Delete any active ligand mols
+    if (pandda_inspect_state.activeLigandMol) {
+        await activeMol.deleteCid(pandda_inspect_state.activeLigandMol);
+        await activeMol.updateAtoms();
+        await activeMol.updateLigands();
+    }
+
+    console.log('Adding autobuild ligand molecule...');
+    console.log(pandda_inspect_state.activeProteinMol);
+    console.log(molecules.moleculeList);
+
+    // Get current CIDs for determining new ligand
+    const currentLigandCIDs = activeMol.ligands.map((_lig) => { return _lig.cid; });
+    console.log(currentLigandCIDs);
+
+    // Load the best ligand autobuild as a new molecule
+    const mol_path = path.join(
+        pandda_inspect_state.args, 
+        'processed_datasets', 
+        pandda_inspect_state.dtag, 
+        `${pandda_inspect_state.dtag}_event_${pandda_inspect_state.event_idx}_best_autobuild.pdb`);
+    const mol_name = 'LIG';
+    try {
+        const newMol = await loadMoleculeFromPath(commandCentre, glRef, coot_dispatch, mol_path, mol_name, []);
+
+
+    // Merge the molecule into the active mol
+    console.log('Merging...')
+    await activeMol.mergeMolecules([newMol]);
+    await activeMol.updateLigands();
+
+    // Delte the new mol
+    console.log('Deleting used mol');
+    await newMol.delete();
+
+    //
+    console.log(activeMol);
+    const newLigandCIDs = activeMol.ligands.map((_lig) => { return _lig.cid; });
+    const activeLigandCID = newLigandCIDs.filter((_cid) => { return !currentLigandCIDs.includes(_cid); })[0];
+    console.log(activeMol.ligands);
+    console.log(activeLigandCID);
+    
+    console.log('Dispatching active mol update...');
+    dispatch(
+        {
+            'type': 'setActiveLigandMol',
+            'val': activeLigandCID,
+        }
+    )
+    } catch (error) {
+        alert(error);
+        return;
+    }
+}
+
+
+
 export function handleSelectEvent(dispatch, event: React.ChangeEvent<HTMLInputElement>) {
     console.log('set event');
     console.log((event.target as HTMLInputElement).value);
@@ -345,6 +411,9 @@ export function handleMoveLigand() {
 }
 export function handleNextLigand(dispatch, molecules, pandda_inspect_state) {
     loadNextLigand(dispatch, molecules, pandda_inspect_state);
+}
+export function handleLoadLigandAutobuild(glRef, commandCentre, molecules, coot_dispatch, dispatch, pandda_inspect_state) {
+    loadLigandAutobuild(glRef, commandCentre, molecules, coot_dispatch, dispatch, pandda_inspect_state);
 }
 export function handleSaveLigand(molecules, pandda_inspect_state) {
     console.log('Save event');

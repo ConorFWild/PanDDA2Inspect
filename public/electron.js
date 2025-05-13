@@ -13,7 +13,6 @@ const isDev = require("electron-is-dev");
 
 const { ipcMain } = require('electron');
 const yargs = require('yargs');
-const pd = require("node-pandas")
 const { format, writeToPath } = require('@fast-csv/format');
 const { parse } = require('fast-csv');
 const { pipeline } = require('node:stream/promises');
@@ -82,8 +81,8 @@ console.log('creating window');
 function createWindow() {
   // Create the browser window.
   const win = new BrowserWindow({
-    width: 800,
-    height: 600,
+    width: 1920,
+    height: 1080,
     icon: path.join(__dirname, "..", "src", "icons", "png", "128x128.png"),
     webPreferences: {
       nodeIntegration: true,
@@ -94,7 +93,7 @@ function createWindow() {
     }
 
   });
-  win.webContents.openDevTools();
+  // win.webContents.openDevTools();
   console.log(path.join(__dirname, 'preload.js'));
 
 
@@ -173,25 +172,33 @@ app.whenReady().then(
     }
 
     console.log(csvPath);
-    const df = pd.readCsv(csvPath);
-    //
-    for (var dfIndex in df) {
-      df[dfIndex][''] = dfIndex;
+    // const df = pd.readCsv(csvPath);
+    const eventTableStream = fs.createReadStream(csvPath);
+    const eventTable = []
+    const eventTableParseStream = parse({ headers: true })
+      .on('error', error => console.error(error))
+      .on('data', row => eventTable.push(row))
+      .on('end', (rowCount) => console.log(`Parsed ${rowCount} rows`));
+    // stream.write(siteDataFrameString);
+    const finishedEventTableStream = await pipeline(eventTableStream, eventTableParseStream)
+
+    for (var eventTableIndex in eventTable) {
+      eventTable[eventTableIndex][''] = eventTableIndex;
     }
 
     // Add inspect records if not alread present
-    if (df.length > 0) {
-      if (!('Viewed' in df[0])) {
-        for (var dfIndex in df) {
-          df[dfIndex]['Interesting'] = 'False';
-          df[dfIndex]['Ligand Placed'] = 'False';
-          df[dfIndex]['Ligand Confidence'] = 'Low';
-          df[dfIndex]['Comment'] = 'None';
-          df[dfIndex]['Viewed'] = 'False';
+    if (eventTable.length > 0) {
+      if (!('Viewed' in eventTable[0])) {
+        for (var eventTableIndex in eventTable) {
+          eventTable[eventTableIndex]['Interesting'] = 'False';
+          eventTable[eventTableIndex]['Ligand Placed'] = 'False';
+          eventTable[eventTableIndex]['Ligand Confidence'] = 'Low';
+          eventTable[eventTableIndex]['Comment'] = 'None';
+          eventTable[eventTableIndex]['Viewed'] = 'False';
         }
       }
     }
-    console.log(df.show);
+    console.log(eventTable.show);
 
     console.log(siteCSVPath);
     // const siteDataFrame = pd.readCsv(siteCSVPath);
@@ -206,7 +213,7 @@ app.whenReady().then(
     console.log(siteDataFrame);
     return {
       args: args,
-      data: df,
+      data: eventTable,
       siteData: siteDataFrame
     }
   }

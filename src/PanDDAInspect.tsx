@@ -210,6 +210,9 @@ const PanDDAInspectModellingControl = ({ state, handlers }) => {
                     <Grid size={1}>
                         <Button sx={buttonStyle} onClick={handlers.handleResetLigand}>Reset To Unfitted Model</Button>
                     </Grid>
+                    <Grid size={2}>
+                        <Button sx={buttonStyle} onClick={handlers.handleLoadLigandAutobuild}>Load Best Event Autobuild</Button>
+                    </Grid>
 
 
                 </Grid>

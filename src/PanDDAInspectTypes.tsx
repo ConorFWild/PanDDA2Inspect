@@ -65,6 +65,7 @@ export type PanDDAInspectEventHandlers = {
   handleMergeLigand: () => void,
   handleMoveLigand: () => void,
   handleNextLigand: () => void,
+  handleLoadLigandAutobuild: () => void,
   handleSaveLigand: () => void,
   handleReloadLigand: () => void,
   handleResetLigand: () => void,
