@@ -210,12 +210,25 @@ export async function loadEventData(cootInitialized, glRef, commandCentre, molec
         await maps.map((_map) => {
             removeMapJS(coot_dispatch, _map);
         });
-        const mol_name = pandda_inspect_state.dtag;
-        const mol_path = path.join(pandda_inspect_state.args, 'processed_datasets', pandda_inspect_state.dtag, 'modelled_structures', `${pandda_inspect_state.dtag}-pandda-model.pdb`);
-        console.log(`Loading mol from ${mol_path}`)
-        console.log('Awaiting load molecule...');
-        console.log(pandda_inspect_state.ligandFiles.get(mol_name));
-        let newMolecule = await loadMoleculeFromPath(commandCentre, glRef, coot_dispatch, mol_path, mol_name, pandda_inspect_state.ligandFiles.get(mol_name));
+
+        let newMolecule;
+        
+        try {
+            const mol_name = pandda_inspect_state.dtag;
+            const mol_path = path.join(pandda_inspect_state.args, 'processed_datasets', pandda_inspect_state.dtag, 'modelled_structures', `${pandda_inspect_state.dtag}-pandda-model.pdb`);
+            console.log(`Loading mol from ${mol_path}`)
+            console.log('Awaiting load molecule...');
+            console.log(pandda_inspect_state.ligandFiles.get(mol_name));
+            let newMolecule = await loadMoleculeFromPath(commandCentre, glRef, coot_dispatch, mol_path, mol_name, pandda_inspect_state.ligandFiles.get(mol_name));
+        } catch (error) {
+            const mol_name = pandda_inspect_state.dtag;
+            const mol_path = path.join(pandda_inspect_state.args, 'processed_datasets', pandda_inspect_state.dtag, `${pandda_inspect_state.dtag}-pandda-input.pdb`);
+            console.log(`Loading mol from ${mol_path}`)
+            console.log('Awaiting load molecule...');
+            console.log(pandda_inspect_state.ligandFiles.get(mol_name));
+            let newMolecule = await loadMoleculeFromPath(commandCentre, glRef, coot_dispatch, mol_path, mol_name, pandda_inspect_state.ligandFiles.get(mol_name));
+        }
+
 
         try {
             const map_name = `${pandda_inspect_state.dtag}_${pandda_inspect_state.event_idx}`;
