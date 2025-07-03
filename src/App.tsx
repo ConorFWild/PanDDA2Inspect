@@ -113,14 +113,14 @@ function MoorhenController() {
 
 
   const pandda_inspect_event_handlers: PanDDAInspectEventHandlers = {
-    handleSelectEvent: (event) => { handleSelectEvent(dispatch, event) },
-    handleNextEvent: () => { handleNextEvent(glRef, commandCentre, molecules, dispatch, pandda_inspect_state) },
-    handlePreviousEvent: () => { handlePreviousEvent(glRef, commandCentre, dispatch) },
-    handlePreviousSite: () => { handlePreviousSite(glRef, commandCentre, dispatch) },
-    handleNextSite: () => { handleNextSite(glRef, commandCentre, dispatch) },
-    handleNextUnviewed: () => { handleNextUnviewed(glRef, commandCentre, dispatch) },
-    handleNextUnmodelled: () => { handleNextUnmodelled(glRef, commandCentre, dispatch) },
-    handleNextEventDontSave: () => { handleNextEventDontSave(glRef, commandCentre, dispatch) },
+    handleSelectEvent: (event, setIsLoading) => { handleSelectEvent(cootInitialized, glRef, commandCentre, molecules, maps, coot_dispatch, dispatch, pandda_inspect_state, setIsLoading, event) },
+    handleNextEvent: (setIsLoading) => { handleNextEvent(cootInitialized, glRef, commandCentre, molecules, maps, coot_dispatch, dispatch, pandda_inspect_state, setIsLoading) },
+    handlePreviousEvent: (setIsLoading) => { handlePreviousEvent(cootInitialized, glRef, commandCentre, molecules, maps, coot_dispatch, dispatch, pandda_inspect_state, setIsLoading) },
+    handlePreviousSite: (setIsLoading) => { handlePreviousSite(cootInitialized, glRef, commandCentre, molecules, maps, coot_dispatch, dispatch, pandda_inspect_state, setIsLoading) },
+    handleNextSite: (setIsLoading) => { handleNextSite(cootInitialized, glRef, commandCentre, molecules, maps, coot_dispatch, dispatch, pandda_inspect_state, setIsLoading) },
+    handleNextUnviewed: (setIsLoading) => { handleNextUnviewed(cootInitialized, glRef, commandCentre, molecules, maps, coot_dispatch, dispatch, pandda_inspect_state, setIsLoading) },
+    handleNextUnmodelled: (setIsLoading) => { handleNextUnmodelled(cootInitialized, glRef, commandCentre, molecules, maps, coot_dispatch, dispatch, pandda_inspect_state, setIsLoading) },
+    handleNextEventDontSave: (setIsLoading) => { handleNextEventDontSave(cootInitialized, glRef, commandCentre, molecules, maps, coot_dispatch, dispatch, pandda_inspect_state, setIsLoading) },
 
     handleMergeLigand: () => { handleMergeLigand(glRef, commandCentre, dispatch) },
     handleMoveLigand: () => { handleMoveLigand() },
@@ -148,7 +148,9 @@ function MoorhenController() {
     () => {
       loadEventData(cootInitialized, glRef, commandCentre, molecules, maps, coot_dispatch, dispatch, pandda_inspect_state);
     },
-    [cootInitialized, pandda_inspect_state.table_idx, pandda_inspect_state.ligandFiles]
+    // [cootInitialized, pandda_inspect_state.table_idx, pandda_inspect_state.ligandFiles]
+    [cootInitialized]
+
   )
 
 

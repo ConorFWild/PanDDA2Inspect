@@ -54,6 +54,40 @@ export const panddaInspectColumns = [
     'Viewed'
 ] as const;
 
+export type panddaInspectColumnTypes = [
+    string,
+    BigInt,
+    number,
+    BigInt,
+    number,
+    number,
+    number,
+    number,
+    BigInt,
+    number,
+    number,
+    number,
+    number,
+    number,
+    number,
+    number,
+    number,
+    number,
+    number,
+    number,
+    number,
+    boolean,
+    boolean,
+    boolean,
+    boolean,
+    number,
+    boolean,
+    boolean,
+    boolean,
+    boolean,
+    boolean
+];
+
 export const initialPanDDAInspectState: PanDDAInspectState = {
     table_idx: 0,
     dtag: 'BAZ2BA-x000',
@@ -81,4 +115,5 @@ export const initialPanDDAInspectState: PanDDAInspectState = {
     ligandFiles: new Map(),
     activeProteinMol: null,
     activeLigandMol: null,
+    loading: false
 };

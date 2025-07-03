@@ -107,6 +107,14 @@ export function panDDAInspectReducer(draft, action) {
         }
         case 'handleNextEvent': {
             console.log(`Next event from ${draft.table_idx}...`);
+            console.log(`loading status: ${draft.loading}`);
+            if (draft.loading == true) {
+                console.log('Still loading data! Skipping!');
+                break;
+            } else {
+                console.log('Ready to begin loading new data!');
+            }
+
             let new_index = 0;
             if (draft.table_idx == (draft.data.length - 1)) {
                 new_index = 0;
@@ -121,6 +129,8 @@ export function panDDAInspectReducer(draft, action) {
             console.log(`site data: ${siteRecord}`)
             updateSite(draft, siteRecord);
             draft.table_idx = new_index;
+
+            draft.loading = true;
 
             break;
         }
@@ -164,6 +174,7 @@ export function panDDAInspectReducer(draft, action) {
             console.log(siteNums);
             const highestSiteNum = Math.max(...siteNums);
             console.log(highestSiteNum);
+            console.log(`Original site: ${draft.site}`);
             let newSite = 0;
             if (draft.site == highestSiteNum) {
                 newSite = 0;
@@ -334,6 +345,12 @@ export function panDDAInspectReducer(draft, action) {
             if ((typeof action.value) != undefined) {
                 draft.site_comment = action.value;
             }
+            break;
+        }
+
+        case 'finishedLoading': {
+            console.log('Finished loading!');
+            draft.loading = false;
             break;
         }
 

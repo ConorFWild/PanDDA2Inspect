@@ -52,6 +52,40 @@ let panddaInspectColumns = [
   'Viewed'
 ];
 
+let panddaInspectColumnTypes = {
+    'dtag': String,
+    'event_idx': parseInt,
+    'bdc': Number,
+    'cluster_size': parseInt,
+    'global_correlation_to_average_map': Number,
+    'global_correlation_to_mean_map': Number,
+    'local_correlation_to_average_map': Number,
+    'local_correlation_to_mean_map': Number,
+    'site_idx': parseInt,
+    'x': Number,
+    'y': Number,
+    'z': Number,
+    'z_mean': Number,
+    'z_peak':Number,
+    'applied_b_factor_scaling': Number,
+    'high_resolution': Number,
+    'low_resolution': Number,
+    'r_free': Number,
+    'r_work': Number,
+    'analysed_resolution': Number,
+    'map_uncertainty': Number,
+    'analysed': Boolean,
+    'interesting': Boolean,
+    'exclude_from_z_map_analysis': Boolean,
+    'exclude_from_characterisation': Boolean,
+    '1-BDC': Number,
+    'Interesting': String,
+    'Ligand Placed': String,
+    'Ligand Confidence': String,
+    'Comment': String,
+    'Viewed': String
+};
+
 
 let panddaInspectSitesColumns = [
   'site_idx',
@@ -60,6 +94,13 @@ let panddaInspectSitesColumns = [
   'Comment'
 
 ];
+
+let panddaInspectSitesColumnTypes = {
+  'site_idx': parseInt,
+  'centroid': (_x) => {return JSON.parse(_x.replace("(", "").replace(")", "").replace(/^/, '[').replace(/$/, ']'))},
+  'Name': String,
+  'Comment': String
+};
 // Handle creating/removing shortcuts on Windows when installing/uninstalling
 if (require("electron-squirrel-startup")) {
   app.quit();
@@ -183,7 +224,13 @@ app.whenReady().then(
     const finishedEventTableStream = await pipeline(eventTableStream, eventTableParseStream)
 
     for (var eventTableIndex in eventTable) {
-      eventTable[eventTableIndex][''] = eventTableIndex;
+      eventTable[eventTableIndex][''] = parseInt(eventTableIndex);
+      for (_property in eventTable[eventTableIndex]) {
+        if (_property in panddaInspectColumnTypes) {
+          eventTable[eventTableIndex][_property] = panddaInspectColumnTypes[_property](eventTable[eventTableIndex][_property]);
+        }
+      } 
+      //eventTable[eventTableIndex]['site_idx'] = parseInt(eventTable[eventTableIndex]['site_idx']);
     }
 
     // Add inspect records if not alread present
@@ -198,7 +245,8 @@ app.whenReady().then(
         }
       }
     }
-    console.log(eventTable.show);
+    // console.log(eventTable.show);
+    console.log(eventTable);
 
     console.log(siteCSVPath);
     // const siteDataFrame = pd.readCsv(siteCSVPath);
@@ -209,7 +257,14 @@ app.whenReady().then(
       .on('data', row => siteDataFrame.push(row))
       .on('end', (rowCount) => console.log(`Parsed ${rowCount} rows`));
     // stream.write(siteDataFrameString);
-    const finishedStream = await pipeline(siteDataFrameStream, parseStream)
+    const finishedStream = await pipeline(siteDataFrameStream, parseStream);
+    for (var siteTableIndex in siteDataFrame) {
+      for (_property in siteDataFrame[siteTableIndex]) {
+        if (_property in panddaInspectSitesColumnTypes) {
+          siteDataFrame[siteTableIndex][_property] = panddaInspectSitesColumnTypes[_property](siteDataFrame[siteTableIndex][_property]);
+        }
+      }
+    }
     console.log(siteDataFrame);
     return {
       args: args,
@@ -303,7 +358,7 @@ app.whenReady().then(
       record = action.data[index];
       newRecord = [
         record['site_idx'],
-        record['centroid'],
+        `(${record['centroid'][0]},${record['centroid'][1]},${record['centroid'][2]})`,
         record['Name'],
         record['Comment'],
       ];

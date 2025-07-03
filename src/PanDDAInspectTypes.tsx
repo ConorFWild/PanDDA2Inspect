@@ -49,18 +49,19 @@ export type PanDDAInspectState = {
   ligandFiles: any;
   activeProteinMol: any;
   activeLigandMol: any;
+  loading: boolean
 };
 
 
 export type PanDDAInspectEventHandlers = {
-  handleSelectEvent: (event: React.ChangeEvent<HTMLInputElement>) => void,
-  handleNextEvent: () => void,
-  handlePreviousEvent: () => void,
-  handlePreviousSite: () => void,
-  handleNextSite: () => void,
-  handleNextUnviewed: () => void,
-  handleNextUnmodelled: () => void,
-  handleNextEventDontSave: () => void,
+  handleSelectEvent: (setIsLoading: any, event: React.ChangeEvent<HTMLInputElement>, ) => void,
+  handleNextEvent: (setIsLoading: any) => void,
+  handlePreviousEvent: (setIsLoading: any) => void,
+  handlePreviousSite: (setIsLoading: any) => void,
+  handleNextSite: (setIsLoading: any) => void,
+  handleNextUnviewed: (setIsLoading: any) => void,
+  handleNextUnmodelled: (setIsLoading: any) => void,
+  handleNextEventDontSave: (setIsLoading: any) => void,
 
   handleMergeLigand: () => void,
   handleMoveLigand: () => void,

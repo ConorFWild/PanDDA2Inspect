@@ -16,6 +16,8 @@ import Typography from '@mui/material/Typography';
 import { Button } from '@mui/material';
 import { ThemeProvider } from '@mui/material'
 import { green } from '@mui/material/colors';
+import { useState } from 'react';
+
 
 import { theme } from './PanDDA2Constants';
 import { EventInteresting, LigandPlaced, LigandConfidence } from './PanDDAInspectTypes';
@@ -123,20 +125,22 @@ const PanDDAInspectDatasetControl = ({ state, handlers }) => {
     }
     );
 
+    const [isLoading, setIsLoading] = useState(false);
+
     return (
         <Box sx={{
             //height: window.innerHeight * 0.3 
         }}>
             <div>
                 <Item>Dataset Control</Item>
-                <FormControl fullWidth>
+                <FormControl fullWidth disabled={isLoading ? true : false}>
                     <InputLabel id="demo-simple-select-label">Select Event</InputLabel>
                     <Select
                         labelId="demo-simple-select-label"
                         id="demo-simple-select"
                         // value={age}
                         label="Age"
-                        onChange={handlers.handleSelectEvent}
+                        onChange={isLoading ? (event) => {console.log('Loading data! Disabled!')} : (event) => {setIsLoading(true); handlers.handleSelectEvent(event, setIsLoading)}}
                     >
                         {selectItems}
                     </Select>
@@ -147,29 +151,46 @@ const PanDDAInspectDatasetControl = ({ state, handlers }) => {
                         <Grid size={1}>
                             <Button
                                 sx={buttonStyle}
-                                onClick={handlers.handlePreviousEvent}
+                                onClick={isLoading ? () => {console.log('Loading data! Disabled!')} : () => {setIsLoading(true); handlers.handlePreviousEvent(setIsLoading)}}
+                                disabled={isLoading ? true : false}
                             >Previous Event</Button>
                         </Grid>
                         <Grid size={1}>
                             <Button
                                 sx={buttonStyle}
-                                onClick={handlers.handleNextEvent}
+                                onClick={isLoading ? () => {console.log('Loading data! Disabled!')} : () => {setIsLoading(true); handlers.handleNextEvent(setIsLoading)} }
+                                disabled={isLoading ? true : false}
                             >Next Event</Button>
                         </Grid>
                         <Grid size={1}>
-                            <Button sx={buttonStyle} onClick={handlers.handlePreviousSite}>Previous Site</Button>
+                            <Button 
+                            sx={buttonStyle} 
+                            onClick={isLoading ? () => {console.log('Loading data! Disabled!')} : () => {setIsLoading(true); handlers.handlePreviousSite(setIsLoading)}} 
+                            disabled={isLoading ? true : false}>Previous Site</Button>
                         </Grid>
                         <Grid size={1}>
-                            <Button sx={buttonStyle} onClick={handlers.handleNextSite}>Next Site</Button>
+                            <Button 
+                            sx={buttonStyle} 
+                            onClick={isLoading ? () => {console.log('Loading data! Disabled!')} : () => {setIsLoading(true); handlers.handleNextSite(setIsLoading)}} 
+                            disabled={isLoading ? true : false}>Next Site</Button>
                         </Grid>
                         <Grid size={1}>
-                            <Button sx={buttonStyle} onClick={handlers.handleNextUnviewed}>Next Unviewed</Button>
+                            <Button 
+                            sx={buttonStyle} 
+                            onClick={isLoading ? () => {console.log('Loading data! Disabled!')} : () => {setIsLoading(true); handlers.handleNextUnviewed(setIsLoading)}} 
+                            disabled={isLoading ? true : false}>Next Unviewed</Button>
                         </Grid>
                         <Grid size={1}>
-                            <Button sx={buttonStyle} onClick={handlers.handleNextUnmodelled}>Next Unmodelled</Button>
+                            <Button 
+                            sx={buttonStyle} 
+                            onClick={isLoading ? () => {console.log('Loading data! Disabled!')} : () => {setIsLoading(true); handlers.handleNextUnmodelled(setIsLoading)}} 
+                            disabled={isLoading ? true : false}>Next Unmodelled</Button>
                         </Grid>
                         <Grid size={1}>
-                            <Button sx={buttonStyle} onClick={handlers.handleNextEventDontSave}>Next Event (Don't Save)</Button>
+                            <Button 
+                            sx={buttonStyle} 
+                            onClick={isLoading ? () => {console.log('Loading data! Disabled!')} : () => {setIsLoading(true); handlers.handleNextEventDontSave(setIsLoading)}} 
+                            disabled={isLoading ? true : false}>Next Event (Don't Save)</Button>
                         </Grid>
                         {/* <Grid size={1}>
               <Button>Select Event</Button>
