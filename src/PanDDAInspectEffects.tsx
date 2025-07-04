@@ -239,7 +239,7 @@ export async function loadEventData(cootInitialized, glRef, commandCentre, molec
 
         try {
             const map_name = `${pandda_inspect_state.dtag}_${pandda_inspect_state.event_idx}`;
-            const map_path = path.join(pandda_inspect_state.args, 'processed_datasets', pandda_inspect_state.dtag, `${pandda_inspect_state.dtag}-event_${pandda_inspect_state.event_idx}_1-BDC_${pandda_inspect_state.bdc}_map.native.ccp4`);
+            const map_path = path.join(pandda_inspect_state.args, 'processed_datasets', pandda_inspect_state.dtag, `${pandda_inspect_state.dtag}-event_${pandda_inspect_state.event_idx}_1-BDC_${Number.parseFloat(pandda_inspect_state.bdc).toFixed(2)}_map.native.ccp4`);
             console.log(`Loading map from ${map_path}`)
             console.log('Awaiting load map...');
             console.log(`Centering ${[pandda_inspect_state.x, pandda_inspect_state.y, pandda_inspect_state.z]}`);
