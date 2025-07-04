@@ -8,8 +8,10 @@ import path from 'path-browserify';
 import { structureFactors } from './PanDDA2Constants';
 
 function tableIdxToEvent(idx, pandda_inspect_state) {
+    console.log(pandda_inspect_state.data);
+    console.log(idx);
     const record = pandda_inspect_state.data[idx];
-    
+    console.log(record);
     return {
         args: pandda_inspect_state.args,
         ligandFiles: pandda_inspect_state.ligandFiles,
@@ -42,6 +44,10 @@ async function loadMoleculeFromPath(commandCentre, glRef, dispatch, mol_path, mo
 
         const data = await window.electronAPI.getFileFromPath({ path: mol_path });
         console.log(data);
+
+        if (data == null) {
+            return null;
+        }
 
         const chunkSize = 65536
         let pdbStr: string = ""
@@ -212,21 +218,22 @@ export async function loadEventData(cootInitialized, glRef, commandCentre, molec
         });
 
         let newMolecule;
-        
-        try {
-            const mol_name = pandda_inspect_state.dtag;
-            const mol_path = path.join(pandda_inspect_state.args, 'processed_datasets', pandda_inspect_state.dtag, 'modelled_structures', `${pandda_inspect_state.dtag}-pandda-model.pdb`);
-            console.log(`Loading mol from ${mol_path}`)
-            console.log('Awaiting load molecule...');
-            console.log(pandda_inspect_state.ligandFiles.get(mol_name));
-            let newMolecule = await loadMoleculeFromPath(commandCentre, glRef, coot_dispatch, mol_path, mol_name, pandda_inspect_state.ligandFiles.get(mol_name));
-        } catch (error) {
+
+        const mol_name = pandda_inspect_state.dtag;
+        const mol_path = path.join(pandda_inspect_state.args, 'processed_datasets', pandda_inspect_state.dtag, 'modelled_structures', `${pandda_inspect_state.dtag}-pandda-model.pdb`);
+        console.log(`Loading mol from ${mol_path}`)
+        console.log('Awaiting load molecule...');
+        console.log(pandda_inspect_state.ligandFiles.get(mol_name));
+        newMolecule = await loadMoleculeFromPath(commandCentre, glRef, coot_dispatch, mol_path, mol_name, pandda_inspect_state.ligandFiles.get(mol_name));
+        console.log(`newMolecule is ${newMolecule}`);    
+
+        if (newMolecule == null) {
             const mol_name = pandda_inspect_state.dtag;
             const mol_path = path.join(pandda_inspect_state.args, 'processed_datasets', pandda_inspect_state.dtag, `${pandda_inspect_state.dtag}-pandda-input.pdb`);
             console.log(`Loading mol from ${mol_path}`)
             console.log('Awaiting load molecule...');
             console.log(pandda_inspect_state.ligandFiles.get(mol_name));
-            let newMolecule = await loadMoleculeFromPath(commandCentre, glRef, coot_dispatch, mol_path, mol_name, pandda_inspect_state.ligandFiles.get(mol_name));
+            newMolecule = await loadMoleculeFromPath(commandCentre, glRef, coot_dispatch, mol_path, mol_name, pandda_inspect_state.ligandFiles.get(mol_name));
         }
 
 
@@ -388,7 +395,7 @@ export function handleSelectEvent(cootInitialized, glRef, commandCentre, molecul
 export function handleNextEvent(cootInitialized, glRef, commandCentre, molecules, maps, coot_dispatch, dispatch, pandda_inspect_state, setIsLoading) {
     console.log('Select event');
     async function nextEvent() {
-        const nextEventIdx = (pandda_inspect_state.table_idx + 1) % pandda_inspect_state.data.length;
+        const nextEventIdx = ((pandda_inspect_state.table_idx + 1) % pandda_inspect_state.data.length) % pandda_inspect_state.data.length;
         console.log(`Next event IDX: ${nextEventIdx}`);
         const nextEventData = tableIdxToEvent(nextEventIdx, pandda_inspect_state);
         console.log(nextEventData);
@@ -420,8 +427,8 @@ export function handleNextEvent(cootInitialized, glRef, commandCentre, molecules
 export function handlePreviousEvent(cootInitialized, glRef, commandCentre, molecules, maps, coot_dispatch, dispatch, pandda_inspect_state, setIsLoading) {
     async function previousEvent() {
     console.log('Select event');
-    const nextEventIdx = ((pandda_inspect_state.table_idx - 1) % pandda_inspect_state.data.length) + pandda_inspect_state.data.length;
-    console.log(`Next event IDX: ${nextEventIdx}`);
+    const nextEventIdx = (((pandda_inspect_state.table_idx - 1) % pandda_inspect_state.data.length) + pandda_inspect_state.data.length) % pandda_inspect_state.data.length;
+    console.log(`Next event IDX: ${nextEventIdx}, current is ${pandda_inspect_state.table_idx}`);
     const nextEventData = tableIdxToEvent(nextEventIdx, pandda_inspect_state);
     console.log(nextEventData);
 
@@ -441,7 +448,7 @@ export function handlePreviousSite(cootInitialized, glRef, commandCentre, molecu
 
     const siteNums = pandda_inspect_state.data.map((_record) => { return _record.site_idx; });
     const highestSiteNum = Math.max(...siteNums);
-    let newSite = ((pandda_inspect_state.site - 1) % highestSiteNum) + highestSiteNum;
+    let newSite = (((pandda_inspect_state.site - 1) % highestSiteNum) + highestSiteNum) % highestSiteNum;
     const siteRecords = pandda_inspect_state.data.filter((_record) => { return (_record.site_idx == newSite); });
     const siteIndexes = siteRecords.map((_record) => { return _record['']; });
     const nextEventIdx = Math.min(...siteIndexes);
@@ -472,7 +479,7 @@ export function handleNextSite(cootInitialized, glRef, commandCentre, molecules,
     async function nextSite() {
         const siteNums = pandda_inspect_state.data.map((_record) => { return _record.site_idx; });
         const highestSiteNum = Math.max(...siteNums);
-        let newSite = (pandda_inspect_state.site + 1) % highestSiteNum;
+        let newSite = ((pandda_inspect_state.site + 1) % highestSiteNum) % highestSiteNum;
         const siteRecords = pandda_inspect_state.data.filter((_record) => { return (_record.site_idx == newSite); });
         const siteIndexes = siteRecords.map((_record) => { return _record['']; });
         const nextEventIdx = Math.min(...siteIndexes);

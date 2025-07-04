@@ -398,10 +398,15 @@ app.whenReady().then(
 
     // Load molecule into coot instance and draw it using "bonds"
     // const mol_path = path.join(action.pandda_dir, 'processed_datasets', action.dtag, 'modelled_structures', `${action.dtag}-pandda-model.pdb`);
-    const data = fs.readFileSync(action.path);
-    // console.log(data);
+    if (fs.existsSync(action.path)) {
+      const data = fs.readFileSync(action.path);
+      // console.log(data);
 
-    return data;
+      return data;
+    } else {
+      console.log(`No such path ${action.path}`);
+      return null;
+    }
   })
 
   ipcMain.handle('save-model', async (event, action) => {
